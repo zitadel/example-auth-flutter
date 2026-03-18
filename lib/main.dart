@@ -26,8 +26,7 @@ Future<void> main() async {
 
   userManager = OidcUserManager.lazy(
     discoveryDocumentUri: OidcUtils.getOpenIdConfigWellKnownUri(zitadelIssuer),
-    clientCredentials:
-        OidcClientAuthentication.none(clientId: zitadelClientId),
+    clientCredentials: OidcClientAuthentication.none(clientId: zitadelClientId),
     store: OidcDefaultStore(),
     settings: OidcUserManagerSettings(
       redirectUri: redirectUri,

@@ -37,5 +37,6 @@ jobs:
       - name: Install Dependencies
         run: flutter pub get
 
-      - name: Inspect Dependencies
-        uses: mridang/action-dependency-insight@v1
+      # TODO: Enable once action-dependency-insight supports Flutter/pub
+      # - name: Inspect Dependencies
+      #   uses: mridang/action-dependency-insight@v1

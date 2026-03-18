@@ -32,6 +32,9 @@ jobs:
         with:
           channel: stable
 
+      - name: Create .env
+        run: cp .env.example .env
+
       - name: Install Dependencies
         run: flutter pub get
 

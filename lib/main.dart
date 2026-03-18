@@ -19,7 +19,13 @@ late Future<void> initFuture;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await dotenv.load(fileName: '.env');
+  try {
+    await dotenv.load(fileName: '.env');
+  } on Exception {
+    throw StateError(
+      '.env file not found. Copy .env.example to .env and configure it.',
+    );
+  }
 
   final zitadelDomain = dotenv.env['ZITADEL_DOMAIN'];
   final zitadelClientId = dotenv.env['ZITADEL_CLIENT_ID'];
@@ -54,9 +60,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
+      theme: ThemeData(primarySwatch: Colors.blue),
       builder: (context, child) {
         // Show a loading widget while the app is initializing.
         // This can be used to show a splash screen for example.
@@ -68,9 +72,7 @@ class MyApp extends StatelessWidget {
             }
             if (snapshot.connectionState != ConnectionState.done) {
               return const Material(
-                child: Center(
-                  child: CircularProgressIndicator.adaptive(),
-                ),
+                child: Center(child: CircularProgressIndicator.adaptive()),
               );
             }
             return child!;
@@ -153,9 +155,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
+      appBar: AppBar(title: Text(widget.title)),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -176,9 +176,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 )
               else ...[
                 if (_authenticated) ...[
-                  Text(
-                    'Hello $_username!',
-                  ),
+                  Text('Hello $_username!'),
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 16.0),
                     child: ElevatedButton(
@@ -187,9 +185,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                   ),
                 ] else ...[
-                  const Text(
-                    'You are not authenticated.',
-                  ),
+                  const Text('You are not authenticated.'),
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 16.0),
                     child: ElevatedButton.icon(

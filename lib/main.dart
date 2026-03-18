@@ -4,7 +4,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:oidc/oidc.dart';
 import 'package:oidc_default_store/oidc_default_store.dart';
 
-/// This should be the app's bundle id.
+/// The custom URL scheme used for OIDC redirect callbacks on mobile platforms.
 const callbackUrlScheme = 'com.zitadel.zitadelflutter';
 
 /// for web platforms, we use http://website-url.com/auth.html
@@ -21,8 +21,15 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: '.env');
 
-  final zitadelIssuer = Uri.parse(dotenv.env['ZITADEL_DOMAIN']!);
-  final zitadelClientId = dotenv.env['ZITADEL_CLIENT_ID']!;
+  final zitadelDomain = dotenv.env['ZITADEL_DOMAIN'];
+  final zitadelClientId = dotenv.env['ZITADEL_CLIENT_ID'];
+  if (zitadelDomain == null || zitadelDomain.isEmpty) {
+    throw StateError('ZITADEL_DOMAIN is not set. Check your .env file.');
+  }
+  if (zitadelClientId == null || zitadelClientId.isEmpty) {
+    throw StateError('ZITADEL_CLIENT_ID is not set. Check your .env file.');
+  }
+  final zitadelIssuer = Uri.parse(zitadelDomain);
 
   userManager = OidcUserManager.lazy(
     discoveryDocumentUri: OidcUtils.getOpenIdConfigWellKnownUri(zitadelIssuer),

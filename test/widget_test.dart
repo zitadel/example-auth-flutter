@@ -6,12 +6,13 @@ import 'package:oidc_default_store/oidc_default_store.dart';
 import 'package:zitadel_flutter/main.dart';
 
 void main() {
-  setUp(() {
+  setUpAll(() {
     userManager = OidcUserManager.lazy(
       discoveryDocumentUri: OidcUtils.getOpenIdConfigWellKnownUri(
         Uri.parse('https://example.zitadel.cloud'),
       ),
-      clientCredentials: OidcClientAuthentication.none(clientId: 'test-client'),
+      clientCredentials:
+          const OidcClientAuthentication.none(clientId: 'test-client'),
       store: OidcDefaultStore(),
       settings: OidcUserManagerSettings(
         redirectUri: Uri.parse('http://localhost/callback'),

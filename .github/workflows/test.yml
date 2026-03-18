@@ -42,7 +42,7 @@ jobs:
         run: flutter test --coverage
 
       - name: Generate coverage report
-        uses: mridang/action-test-reporter@v1
+        uses: mridang/action-test-reporter@7cdeb9814532cbf9006fca1641b37a6acbc2f7a6 # v1
         if: always()
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}

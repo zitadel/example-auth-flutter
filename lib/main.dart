@@ -1,43 +1,41 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:oidc/oidc.dart';
 import 'package:oidc_default_store/oidc_default_store.dart';
-
-/// Zitadel url + client id.
-/// you can replace String.fromEnvironment(*) calls with the actual values
-/// if you don't want to pass them dynamically.
-final zitadelIssuer = Uri.parse(const String.fromEnvironment('zitadel_url'));
-const zitadelClientId = String.fromEnvironment('zitadel_client_id');
 
 /// This should be the app's bundle id.
 const callbackUrlScheme = 'com.zitadel.zitadelflutter';
 
-/// This will be the current url of the page + /auth.html added to it.
-final baseUri = Uri.base;
-final webCallbackUrl = Uri.base.replace(path: 'auth.html');
-
 /// for web platforms, we use http://website-url.com/auth.html
 ///
 /// for mobile platforms, we use `com.zitadel.zitadelflutter:/`
-final redirectUri =
-    kIsWeb ? webCallbackUrl : Uri(scheme: callbackUrlScheme, path: '/');
+final redirectUri = kIsWeb
+    ? Uri.base.replace(path: 'auth.html')
+    : Uri(scheme: callbackUrlScheme, path: '/');
 
-final userManager = OidcUserManager.lazy(
-  discoveryDocumentUri: OidcUtils.getOpenIdConfigWellKnownUri(zitadelIssuer),
-  clientCredentials:
-      const OidcClientAuthentication.none(clientId: zitadelClientId),
-  store: OidcDefaultStore(),
-  settings: OidcUserManagerSettings(
-    redirectUri: redirectUri,
-    // the same redirectUri can be used as for post logout too.
-    postLogoutRedirectUri: redirectUri,
-    scope: ['openid', 'profile', 'email', 'offline_access'],
-  ),
-);
+late final OidcUserManager userManager;
 late Future<void> initFuture;
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: '.env');
+
+  final zitadelIssuer = Uri.parse(dotenv.env['ZITADEL_DOMAIN']!);
+  final zitadelClientId = dotenv.env['ZITADEL_CLIENT_ID']!;
+
+  userManager = OidcUserManager.lazy(
+    discoveryDocumentUri: OidcUtils.getOpenIdConfigWellKnownUri(zitadelIssuer),
+    clientCredentials:
+        OidcClientAuthentication.none(clientId: zitadelClientId),
+    store: OidcDefaultStore(),
+    settings: OidcUserManagerSettings(
+      redirectUri: redirectUri,
+      postLogoutRedirectUri: redirectUri,
+      scope: ['openid', 'profile', 'email', 'offline_access'],
+    ),
+  );
+
   initFuture = userManager.init();
   runApp(const MyApp());
 }
@@ -163,7 +161,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 const Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text("Busy, logging in."),
+                    Text('Busy, logging in.'),
                     Padding(
                       padding: EdgeInsets.all(16.0),
                       child: CircularProgressIndicator(),

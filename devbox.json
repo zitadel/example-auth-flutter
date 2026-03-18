@@ -1,0 +1,16 @@
+{
+  "$schema": "https://raw.githubusercontent.com/jetify-com/devbox/0.14.0/.schema/devbox.schema.json",
+  "packages": [
+    "flutter@3.41.2-sdk-links"
+  ],
+  "shell": {
+    "init_hook": [
+      "flutter --version"
+    ],
+    "scripts": {
+      "dev": "set -a && source \"$DEVBOX_PROJECT_ROOT/.env\" && set +a && flutter run -d chrome --web-port=$PORT",
+      "lint": "flutter analyze",
+      "format": "dart format ."
+    }
+  }
+}

@@ -35,7 +35,7 @@
 			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>com.example.zitadelflutter</string>
+				<string>com.zitadel.zitadelflutter</string>
 			</array>
 		</dict>
 	</array>

@@ -11,8 +11,9 @@ void main() {
       discoveryDocumentUri: OidcUtils.getOpenIdConfigWellKnownUri(
         Uri.parse('https://example.zitadel.cloud'),
       ),
-      clientCredentials:
-          const OidcClientAuthentication.none(clientId: 'test-client'),
+      clientCredentials: const OidcClientAuthentication.none(
+        clientId: 'test-client',
+      ),
       store: OidcDefaultStore(),
       settings: OidcUserManagerSettings(
         redirectUri: Uri.parse('http://localhost/callback'),
@@ -21,12 +22,11 @@ void main() {
     initFuture = Future.value();
   });
 
-  testWidgets('App shows login button when not authenticated',
-      (WidgetTester tester) async {
+  testWidgets('App shows login button when not authenticated', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
-      const MaterialApp(
-        home: MyHomePage(title: 'Flutter ZITADEL Quickstart'),
-      ),
+      const MaterialApp(home: MyHomePage(title: 'Flutter ZITADEL Quickstart')),
     );
 
     expect(find.text('You are not authenticated.'), findsOneWidget);

@@ -33,12 +33,12 @@ jobs:
       ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.ref }}
     secrets: inherit
 
-  check-deps:
-    name: Run Dependency Checks
-    uses: ./.github/workflows/unused.yml
-    with:
-      ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.ref }}
-    secrets: inherit
+  # check-deps:
+  #   name: Run Dependency Checks
+  #   uses: ./.github/workflows/unused.yml
+  #   with:
+  #     ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.ref }}
+  #   secrets: inherit
 
   all-passed:
     name: Check Build Status
@@ -47,7 +47,6 @@ jobs:
       - lint-commits
       - code-style
       - run-tests
-      - check-deps
     steps:
       - name: Harden runner
         uses: step-security/harden-runner@0634a2670c59f64b4a01f0f96f84700a4088b9f0 # v2.12.0

@@ -1,4 +1,4 @@
-package com.example.zitadel_flutter
+package com.zitadel.zitadelflutter
 
 import io.flutter.embedding.android.FlutterActivity
 

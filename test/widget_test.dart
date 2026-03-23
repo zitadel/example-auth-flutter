@@ -1,30 +1,36 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:oidc/oidc.dart';
+import 'package:oidc_default_store/oidc_default_store.dart';
 
 import 'package:zitadel_flutter/main.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  setUpAll(() {
+    userManager = OidcUserManager.lazy(
+      discoveryDocumentUri: OidcUtils.getOpenIdConfigWellKnownUri(
+        Uri.parse('https://example.zitadel.cloud'),
+      ),
+      clientCredentials: const OidcClientAuthentication.none(
+        clientId: 'test-client',
+      ),
+      store: OidcDefaultStore(),
+      settings: OidcUserManagerSettings(
+        redirectUri: Uri.parse('http://localhost/callback'),
+      ),
+    );
+    initFuture = Future.value();
+  });
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+  testWidgets('App shows login button when not authenticated', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const MaterialApp(home: MyHomePage(title: 'Flutter ZITADEL Quickstart')),
+    );
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
-
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    expect(find.text('You are not authenticated.'), findsOneWidget);
+    expect(find.text('Login'), findsOneWidget);
+    expect(find.byIcon(Icons.fingerprint), findsOneWidget);
   });
 }

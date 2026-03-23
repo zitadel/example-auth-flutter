@@ -1,43 +1,53 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:oidc/oidc.dart';
 import 'package:oidc_default_store/oidc_default_store.dart';
 
-/// Zitadel url + client id.
-/// you can replace String.fromEnvironment(*) calls with the actual values
-/// if you don't want to pass them dynamically.
-final zitadelIssuer = Uri.parse(const String.fromEnvironment('zitadel_url'));
-const zitadelClientId = String.fromEnvironment('zitadel_client_id');
-
-/// This should be the app's bundle id.
+/// The custom URL scheme used for OIDC redirect callbacks on mobile platforms.
 const callbackUrlScheme = 'com.zitadel.zitadelflutter';
-
-/// This will be the current url of the page + /auth.html added to it.
-final baseUri = Uri.base;
-final webCallbackUrl = Uri.base.replace(path: 'auth.html');
 
 /// for web platforms, we use http://website-url.com/auth.html
 ///
 /// for mobile platforms, we use `com.zitadel.zitadelflutter:/`
-final redirectUri =
-    kIsWeb ? webCallbackUrl : Uri(scheme: callbackUrlScheme, path: '/');
+final redirectUri = kIsWeb
+    ? Uri.base.replace(path: 'auth.html')
+    : Uri(scheme: callbackUrlScheme, path: '/');
 
-final userManager = OidcUserManager.lazy(
-  discoveryDocumentUri: OidcUtils.getOpenIdConfigWellKnownUri(zitadelIssuer),
-  clientCredentials:
-      const OidcClientAuthentication.none(clientId: zitadelClientId),
-  store: OidcDefaultStore(),
-  settings: OidcUserManagerSettings(
-    redirectUri: redirectUri,
-    // the same redirectUri can be used as for post logout too.
-    postLogoutRedirectUri: redirectUri,
-    scope: ['openid', 'profile', 'email', 'offline_access'],
-  ),
-);
+late final OidcUserManager userManager;
 late Future<void> initFuture;
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  try {
+    await dotenv.load(fileName: '.env');
+  } on Exception {
+    throw StateError(
+      '.env file not found. Copy .env.example to .env and configure it.',
+    );
+  }
+
+  final zitadelDomain = dotenv.env['ZITADEL_DOMAIN'];
+  final zitadelClientId = dotenv.env['ZITADEL_CLIENT_ID'];
+  if (zitadelDomain == null || zitadelDomain.isEmpty) {
+    throw StateError('ZITADEL_DOMAIN is not set. Check your .env file.');
+  }
+  if (zitadelClientId == null || zitadelClientId.isEmpty) {
+    throw StateError('ZITADEL_CLIENT_ID is not set. Check your .env file.');
+  }
+  final zitadelIssuer = Uri.parse(zitadelDomain);
+
+  userManager = OidcUserManager.lazy(
+    discoveryDocumentUri: OidcUtils.getOpenIdConfigWellKnownUri(zitadelIssuer),
+    clientCredentials: OidcClientAuthentication.none(clientId: zitadelClientId),
+    store: OidcDefaultStore(),
+    settings: OidcUserManagerSettings(
+      redirectUri: redirectUri,
+      postLogoutRedirectUri: redirectUri,
+      scope: ['openid', 'profile', 'email', 'offline_access'],
+    ),
+  );
+
   initFuture = userManager.init();
   runApp(const MyApp());
 }
@@ -50,9 +60,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
+      theme: ThemeData(primarySwatch: Colors.blue),
       builder: (context, child) {
         // Show a loading widget while the app is initializing.
         // This can be used to show a splash screen for example.
@@ -64,9 +72,7 @@ class MyApp extends StatelessWidget {
             }
             if (snapshot.connectionState != ConnectionState.done) {
               return const Material(
-                child: Center(
-                  child: CircularProgressIndicator.adaptive(),
-                ),
+                child: Center(child: CircularProgressIndicator.adaptive()),
               );
             }
             return child!;
@@ -149,9 +155,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
+      appBar: AppBar(title: Text(widget.title)),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -163,7 +167,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 const Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text("Busy, logging in."),
+                    Text('Busy, logging in.'),
                     Padding(
                       padding: EdgeInsets.all(16.0),
                       child: CircularProgressIndicator(),
@@ -172,9 +176,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 )
               else ...[
                 if (_authenticated) ...[
-                  Text(
-                    'Hello $_username!',
-                  ),
+                  Text('Hello $_username!'),
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 16.0),
                     child: ElevatedButton(
@@ -183,9 +185,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                   ),
                 ] else ...[
-                  const Text(
-                    'You are not authenticated.',
-                  ),
+                  const Text('You are not authenticated.'),
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 16.0),
                     child: ElevatedButton.icon(

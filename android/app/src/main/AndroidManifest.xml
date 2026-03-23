@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.zitadel_flutter">
+    package="com.zitadel.zitadelflutter">
    <application
         android:label="zitadel_flutter"
         android:name="${applicationName}"
